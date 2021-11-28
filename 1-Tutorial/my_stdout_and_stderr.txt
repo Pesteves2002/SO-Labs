@@ -1,0 +1,2 @@
+Goodbye
+cat: nonexistent_file: Ficheiro ou pasta inexistente
