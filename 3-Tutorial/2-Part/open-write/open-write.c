@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
     * - S_IRUSR: reading, user
     * - S_IWUSR: writting, user
     */
-   int fd = open("1", O_CREAT | O_TRUNC | O_WRONLY, S_IRUSR | S_IWUSR);
+   int fd = open("output.txt", O_CREAT | O_TRUNC | O_WRONLY, S_IRUSR | S_IWUSR);
    if (fd < 0)
    {
       printf("open error: %s\n", strerror(errno));
@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
    char buffer[] = "Hello World!\n";
 
    /* write a string to the file */
-   int bytes_written = write(fd, buffer, strlen(buffer));
+   int bytes_written = write(1, buffer, strlen(buffer));
    if (bytes_written < 0)
    {
       printf("write error: %s\n", strerror(errno));

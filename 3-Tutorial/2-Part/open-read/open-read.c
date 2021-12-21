@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
     * - O_RDONLY: open the file for reading
     *
     */
-   int fd = open("0", O_RDONLY);
+   int fd = open("test.txt", O_RDONLY);
    if (fd < 0)
    {
       printf("open error: %s\n", strerror(errno));
@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
    memset(buffer, 0, sizeof(buffer));
 
    /* read the contents of the file */
-   int bytes_read = read(fd, buffer, sizeof(buffer));
+   int bytes_read = read(0, buffer, sizeof(buffer));
    if (bytes_read < 0)
    {
       printf("read error: %s\n", strerror(errno));
