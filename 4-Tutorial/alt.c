@@ -33,7 +33,8 @@ int main()
     }
     else
     {
-        Value = 2;
+
+        Value = 1;
         printf("Value=%d\n", Value);
         wait(&s);
     }
