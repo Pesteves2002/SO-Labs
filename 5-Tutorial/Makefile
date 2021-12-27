@@ -5,7 +5,7 @@
 #
 
 CC = gcc
-CFLAGS = -g -Wall -std=c11
+CFLAGS = -g -Wall -std=gnu11
 
 
 contapartilhada: contapartilhada.o
