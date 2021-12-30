@@ -5,14 +5,11 @@
 #include <assert.h>
 
 #define N 4
-
-pthread_mutex_t trinco = PTHREAD_MUTEX_INITIALIZER;
-pthread_rwlock_t rwl = PTHREAD_RWLOCK_INITIALIZER;
-
 typedef struct
 {
   int saldo;
   int numMovimentos;
+  pthread_rwlock_t rwl;
   /* outras variáveis,ex. nome do titular, etc. */
 } conta_t;
 
@@ -24,10 +21,12 @@ int depositar_dinheiro(conta_t *conta, int valor)
 
   if (valor < 0)
     return -1;
-  pthread_mutex_lock(&trinco);
+  pthread_rwlock_wrlock(&conta->rwl);
+
   conta->saldo += valor;
   conta->numMovimentos++;
-  pthread_mutex_unlock(&trinco);
+
+  pthread_rwlock_wrlock(&conta->rwl);
   return valor;
 }
 
@@ -36,7 +35,9 @@ int levantar_dinheiro(conta_t *conta, int valor)
 
   if (valor < 0)
     return -1;
-  pthread_mutex_lock(&trinco);
+
+  pthread_rwlock_wrlock(&conta->rwl);
+
   if (conta->saldo >= valor)
   {
     conta->saldo -= valor;
@@ -44,7 +45,7 @@ int levantar_dinheiro(conta_t *conta, int valor)
   }
   else
     valor = -1;
-  pthread_mutex_unlock(&trinco);
+  pthread_rwlock_unlock(&conta->rwl);
 
   return valor;
 }
@@ -52,10 +53,10 @@ int levantar_dinheiro(conta_t *conta, int valor)
 void consultar_conta(conta_t *conta)
 {
   int s, n;
-  pthread_rwlock_rdlock(&rwl);
+  pthread_rwlock_rdlock(&conta->rwl);
   s = conta->saldo;
   n = conta->numMovimentos;
-  pthread_rwlock_unlock(&rwl);
+  pthread_rwlock_unlock(&conta->rwl);
   printf("Consulta: saldo=%d, #movimentos=%d\n", s, n);
 }
 
@@ -109,6 +110,7 @@ int main(int argc, char **argv)
 
   c.saldo = 0;
   c.numMovimentos = 0;
+  pthread_rwlock_init(&c.rwl, NULL);
 
   if (pthread_create(&tid[0], NULL, fnAlice, (void *)&m) != 0)
     exit(EXIT_FAILURE);
@@ -132,6 +134,7 @@ int main(int argc, char **argv)
 
   printf("História chegou ao fim\n");
   consultar_conta(&c);
+  pthread_rwlock_destroy(&c.rwl);
 
   exit(EXIT_SUCCESS);
 }

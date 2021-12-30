@@ -5,12 +5,11 @@
 #
 
 CC = gcc
-CFLAGS = -g -Wall -std=gnu11
+CFLAGS = -g -Wall -std=gnu11 -lpthread -fsanitize=undefined -fsanitize=thread
+OBJECTS = contapartilhada
 
-
-contapartilhada: contapartilhada.o
-	gcc -o contapartilhada contapartilhada.o -lpthread
+all: $(OBJECTS)
 
 clean:
-	rm -f *.o contapartilhada 
+	rm -f *.o $(OBJECTS)
 	
