@@ -1,0 +1,5 @@
+*.o
+pipes
+named_pipes_sender
+named_pipes_receiver
+*.pipe
