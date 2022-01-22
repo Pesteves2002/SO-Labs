@@ -67,13 +67,13 @@ int parent_main(int tx, int rx) {
     sleep(1);
     ret = read(rx, buffer, BUFFER_SIZE - 1);
     buffer[ret] = 0;
-    fputs(buffer, stderr);
+    fputs(buffer, stdout);
 
     send_msg(tx, "Is your daddy home?\n");
     sleep(1);
     ret = read(rx, buffer, BUFFER_SIZE - 1);
     buffer[ret] = 0;
-    fputs(buffer, stderr);
+    fputs(buffer, stdout);
 
     send_msg(tx, "Did he go and leave you all alone? ( ͡o ͜ʖ ͡o)\n");
     close(tx);
@@ -81,7 +81,7 @@ int parent_main(int tx, int rx) {
     sleep(1);
     ret = read(rx, buffer, BUFFER_SIZE - 1);
     buffer[ret] = 0;
-    fputs(buffer, stderr);
+    fputs(buffer, stdout);
     fprintf(stderr, "[INFO]: closing pipe\n");
     close(tx);
     close(rx);

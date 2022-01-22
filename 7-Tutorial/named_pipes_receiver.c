@@ -46,19 +46,18 @@ int main() {
         fprintf(stderr, "[ERR]: mkfifo failed: %s\n", strerror(errno));
         exit(EXIT_FAILURE);
     }
+    // open pipe for reading
+    // this waits for someone to open it for writing
+    int rx = open(FIFO_PATHNAME, O_RDONLY);
+    if (rx == -1) {
+        fprintf(stderr, "[ERR]: open failed: %s\n", strerror(errno));
+        exit(EXIT_FAILURE);
+    }
 
     // open pipe for writing
     // this waits for someone to open it for reading
     int tx = open(ANOTHER_ONE, O_WRONLY);
     if (tx == -1) {
-        fprintf(stderr, "[ERR]: open failed: %s\n", strerror(errno));
-        exit(EXIT_FAILURE);
-    }
-
-    // open pipe for reading
-    // this waits for someone to open it for writing
-    int rx = open(FIFO_PATHNAME, O_RDONLY);
-    if (rx == -1) {
         fprintf(stderr, "[ERR]: open failed: %s\n", strerror(errno));
         exit(EXIT_FAILURE);
     }
@@ -83,4 +82,7 @@ int main() {
     }
     close(tx);
     close(rx);
+    // remove pipe if it does exist
+    unlink(ANOTHER_ONE);
+    sleep(1);
 }

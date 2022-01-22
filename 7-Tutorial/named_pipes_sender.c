@@ -60,6 +60,7 @@ int main() {
         fprintf(stderr, "[ERR]: open failed: %s\n", strerror(errno));
         exit(EXIT_FAILURE);
     }
+
     char buffer[BUFFER_SIZE];
 
     ssize_t ret;
@@ -83,4 +84,9 @@ int main() {
 
     fprintf(stderr, "[INFO]: closing pipe\n");
     close(tx);
+    close(rx);
+
+    // remove pipe if it does exist
+    unlink(FIFO_PATHNAME);
+    sleep(1);
 }
