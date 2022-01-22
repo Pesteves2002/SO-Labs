@@ -32,9 +32,10 @@ int child_main(int rx, int tx) {
         fprintf(stderr, "[INFO]: parent sent %zd B\n", ret);
         buffer[ret] = 0;
         fputs(buffer, stdout);
-        send_msg(tx, "AWK");
+        send_msg(tx, "GAWK GAWK\n");
     }
     close(rx);
+    close(tx);
     return 0;
 }
 
@@ -82,6 +83,7 @@ int parent_main(int tx, int rx) {
     buffer[ret] = 0;
     fputs(buffer, stderr);
     fprintf(stderr, "[INFO]: closing pipe\n");
+    close(tx);
     close(rx);
 
     // parent waits for the child
@@ -105,8 +107,12 @@ int main() {
         // we need to close the ends we are not using
         // otherwise, the child will be perpetually waiting for a message that
         // will never come
+        close(filedes[1]);
+        close(bruh[0]);
         return child_main(filedes[0], bruh[1]);
     } else {
+        close(filedes[0]);
+        close(bruh[1]);
         return parent_main(filedes[1], bruh[0]);
     }
 }
