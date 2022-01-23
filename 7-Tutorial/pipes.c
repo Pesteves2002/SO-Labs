@@ -82,6 +82,7 @@ int parent_main(int tx, int rx) {
     ret = read(rx, buffer, BUFFER_SIZE - 1);
     buffer[ret] = 0;
     fputs(buffer, stdout);
+
     fprintf(stderr, "[INFO]: closing pipe\n");
     close(tx);
     close(rx);
@@ -92,13 +93,13 @@ int parent_main(int tx, int rx) {
 }
 
 int main() {
-    int filedes[2];
-    int bruh[2];
-    if (pipe(filedes) != 0) {
+    int pipe1[2];
+    int pipe2[2];
+    if (pipe(pipe1) != 0) {
         fprintf(stderr, "[ERR]: pipe() failed: %s\n", strerror(errno));
         exit(EXIT_FAILURE);
     }
-    if (pipe(bruh) != 0) {
+    if (pipe(pipe2) != 0) {
         fprintf(stderr, "[ERR]: pipe() failed: %s\n", strerror(errno));
         exit(EXIT_FAILURE);
     }
@@ -107,12 +108,12 @@ int main() {
         // we need to close the ends we are not using
         // otherwise, the child will be perpetually waiting for a message that
         // will never come
-        close(filedes[1]);
-        close(bruh[0]);
-        return child_main(filedes[0], bruh[1]);
+        close(pipe1[1]);
+        close(pipe2[0]);
+        return child_main(pipe1[0], pipe2[1]);
     } else {
-        close(filedes[0]);
-        close(bruh[1]);
-        return parent_main(filedes[1], bruh[0]);
+        close(pipe1[0]);
+        close(pipe2[1]);
+        return parent_main(pipe1[1], pipe2[0]);
     }
 }

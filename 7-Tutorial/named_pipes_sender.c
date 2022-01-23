@@ -11,7 +11,7 @@
 #include <unistd.h>
 
 #define FIFO_PATHNAME "fifo.pipe"
-#define ANOTHER_ONE "bruh.pipe"
+#define SECOND_PATHNAME "second.pipe"
 #define BUFFER_SIZE (128)
 
 // helper function to send messages
@@ -55,7 +55,7 @@ int main() {
 
     // open pipe for reading
     // this waits for someone to open it for writing
-    int rx = open(ANOTHER_ONE, O_RDONLY);
+    int rx = open(SECOND_PATHNAME, O_RDONLY);
     if (rx == -1) {
         fprintf(stderr, "[ERR]: open failed: %s\n", strerror(errno));
         exit(EXIT_FAILURE);
@@ -86,7 +86,5 @@ int main() {
     close(tx);
     close(rx);
 
-    // remove pipe if it does exist
     unlink(FIFO_PATHNAME);
-    sleep(1);
 }
