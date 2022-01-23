@@ -11,7 +11,6 @@
 #include <unistd.h>
 
 #define FIFO_PATHNAME "fifo.pipe"
-#define SECOND_PATHNAME "second.pipe"
 
 #define BUFFER_SIZE (128)
 
@@ -34,18 +33,6 @@ void send_msg(int tx, char const *str) {
 
 int main() {
 
-    // remove pipe if it does exist
-    if (unlink(SECOND_PATHNAME) != 0 && errno != ENOENT) {
-        fprintf(stderr, "[ERR]: unlink(%s) failed: %s\n", SECOND_PATHNAME,
-                strerror(errno));
-        exit(EXIT_FAILURE);
-    }
-
-    // create pipe
-    if (mkfifo(SECOND_PATHNAME, 0640) != 0) {
-        fprintf(stderr, "[ERR]: mkfifo failed: %s\n", strerror(errno));
-        exit(EXIT_FAILURE);
-    }
     // open pipe for reading
     // this waits for someone to open it for writing
     int rx = open(FIFO_PATHNAME, O_RDONLY);
@@ -54,9 +41,27 @@ int main() {
         exit(EXIT_FAILURE);
     }
 
+    char second_pipe[BUFFER_SIZE];
+
+    ssize_t ret = read(rx, second_pipe, BUFFER_SIZE - 1);
+    second_pipe[ret] = 0;
+
+    // remove pipe if it does exist
+    if (unlink(second_pipe) != 0 && errno != ENOENT) {
+        fprintf(stderr, "[ERR]: unlink(%s) failed: %s\n", second_pipe,
+                strerror(errno));
+        exit(EXIT_FAILURE);
+    }
+
+    // create pipe
+    if (mkfifo(second_pipe, 0640) != 0) {
+        fprintf(stderr, "[ERR]: mkfifo failed: %s\n", strerror(errno));
+        exit(EXIT_FAILURE);
+    }
+
     // open pipe for writing
     // this waits for someone to open it for reading
-    int tx = open(SECOND_PATHNAME, O_WRONLY);
+    int tx = open(second_pipe, O_WRONLY);
     if (tx == -1) {
         fprintf(stderr, "[ERR]: open failed: %s\n", strerror(errno));
         exit(EXIT_FAILURE);
@@ -82,5 +87,5 @@ int main() {
     }
     close(tx);
     close(rx);
-    unlink(SECOND_PATHNAME);
+    unlink(second_pipe);
 }

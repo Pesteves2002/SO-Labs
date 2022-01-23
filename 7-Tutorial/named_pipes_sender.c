@@ -11,7 +11,6 @@
 #include <unistd.h>
 
 #define FIFO_PATHNAME "fifo.pipe"
-#define SECOND_PATHNAME "second.pipe"
 #define BUFFER_SIZE (128)
 
 // helper function to send messages
@@ -31,7 +30,12 @@ void send_msg(int tx, char const *str) {
     }
 }
 
-int main() {
+int main(int argc, char **argv) {
+
+    if (argc < 2) {
+        printf("Needs the name of the pipe.\n");
+        return 1;
+    }
     // remove pipe if it does exist
     if (unlink(FIFO_PATHNAME) != 0 && errno != ENOENT) {
         fprintf(stderr, "[ERR]: unlink(%s) failed: %s\n", FIFO_PATHNAME,
@@ -53,17 +57,24 @@ int main() {
         exit(EXIT_FAILURE);
     }
 
+    char buffer[BUFFER_SIZE];
+
+    ssize_t ret;
+
+    char *second_pipe = argv[1];
+    // sends the pipename to the other side
+    send_msg(tx, second_pipe);
+
+    // needs to wait for the other pipe is created
+    sleep(1);
+
     // open pipe for reading
     // this waits for someone to open it for writing
-    int rx = open(SECOND_PATHNAME, O_RDONLY);
+    int rx = open(second_pipe, O_RDONLY);
     if (rx == -1) {
         fprintf(stderr, "[ERR]: open failed: %s\n", strerror(errno));
         exit(EXIT_FAILURE);
     }
-
-    char buffer[BUFFER_SIZE];
-
-    ssize_t ret;
 
     // The parent is likes classic rock:
     // https://www.youtube.com/watch?v=lrpXArn3hII
