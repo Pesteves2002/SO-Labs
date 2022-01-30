@@ -76,7 +76,6 @@ int parent_main(int tx, int rx) {
     fputs(buffer, stdout);
 
     send_msg(tx, "Did he go and leave you all alone? ( ͡o ͜ʖ ͡o)\n");
-    close(tx);
 
     sleep(1);
     ret = read(rx, buffer, BUFFER_SIZE - 1);
