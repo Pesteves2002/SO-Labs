@@ -83,7 +83,7 @@ int main() {
         fprintf(stderr, "[INFO]: received %zd B\n", ret);
         buffer[ret] = 0;
         fputs(buffer, stdout);
-        send_msg(tx, "GAWK GAWK\n");
+        send_msg(tx, "GAWK\n");
     }
     close(tx);
     close(rx);

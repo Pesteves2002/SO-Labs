@@ -32,7 +32,7 @@ int child_main(int rx, int tx) {
         fprintf(stderr, "[INFO]: parent sent %zd B\n", ret);
         buffer[ret] = 0;
         fputs(buffer, stdout);
-        send_msg(tx, "GAWK GAWK\n");
+        send_msg(tx, "GAWK\n");
     }
     close(rx);
     close(tx);
@@ -75,7 +75,7 @@ int parent_main(int tx, int rx) {
     buffer[ret] = 0;
     fputs(buffer, stdout);
 
-    send_msg(tx, "Did he go and leave you all alone? ( ͡o ͜ʖ ͡o)\n");
+    send_msg(tx, "Did he go and leave you all alone?\n");
 
     sleep(1);
     ret = read(rx, buffer, BUFFER_SIZE - 1);

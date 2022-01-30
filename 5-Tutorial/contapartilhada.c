@@ -5,12 +5,13 @@
 #include <assert.h>
 
 #define N 4
+
 typedef struct
 {
   int saldo;
   int numMovimentos;
-  pthread_rwlock_t rwl;
   /* outras variáveis,ex. nome do titular, etc. */
+  pthread_rwlock_t trinco;
 } conta_t;
 
 // Variaveis globais
@@ -18,26 +19,22 @@ conta_t c;
 
 int depositar_dinheiro(conta_t *conta, int valor)
 {
-
   if (valor < 0)
     return -1;
-  pthread_rwlock_wrlock(&conta->rwl);
 
+  pthread_rwlock_wrlock(&conta->trinco);
   conta->saldo += valor;
   conta->numMovimentos++;
-
-  pthread_rwlock_wrlock(&conta->rwl);
+  pthread_rwlock_unlock(&conta->trinco);
   return valor;
 }
 
 int levantar_dinheiro(conta_t *conta, int valor)
 {
-
   if (valor < 0)
     return -1;
 
-  pthread_rwlock_wrlock(&conta->rwl);
-
+  pthread_rwlock_wrlock(&conta->trinco);
   if (conta->saldo >= valor)
   {
     conta->saldo -= valor;
@@ -45,7 +42,7 @@ int levantar_dinheiro(conta_t *conta, int valor)
   }
   else
     valor = -1;
-  pthread_rwlock_unlock(&conta->rwl);
+  pthread_rwlock_unlock(&conta->trinco);
 
   return valor;
 }
@@ -53,10 +50,12 @@ int levantar_dinheiro(conta_t *conta, int valor)
 void consultar_conta(conta_t *conta)
 {
   int s, n;
-  pthread_rwlock_rdlock(&conta->rwl);
+
+  pthread_rwlock_rdlock(&conta->trinco);
   s = conta->saldo;
   n = conta->numMovimentos;
-  pthread_rwlock_unlock(&conta->rwl);
+  pthread_rwlock_unlock(&conta->trinco);
+
   printf("Consulta: saldo=%d, #movimentos=%d\n", s, n);
 }
 
@@ -74,7 +73,6 @@ void *fnAlice(void *arg)
   }
 
   printf("Alice depositou no total: %d\n", total);
-  consultar_conta(&c);
   return NULL;
 }
 
@@ -92,7 +90,16 @@ void *fnBob(void *arg)
   }
 
   printf("Bob gastou no total: %d\n", total);
-  consultar_conta(&c);
+  return NULL;
+}
+
+void *fnConsulta(void *arg)
+{
+  int m = *((int *)arg);
+  for (int i = 0; i < m; i++)
+  {
+    consultar_conta(&c);
+  }
   return NULL;
 }
 
@@ -110,31 +117,21 @@ int main(int argc, char **argv)
 
   c.saldo = 0;
   c.numMovimentos = 0;
-  pthread_rwlock_init(&c.rwl, NULL);
+  pthread_rwlock_init(&c.trinco, NULL);
 
   if (pthread_create(&tid[0], NULL, fnAlice, (void *)&m) != 0)
     exit(EXIT_FAILURE);
   if (pthread_create(&tid[1], NULL, fnBob, (void *)&m) != 0)
     exit(EXIT_FAILURE);
-  if (pthread_create(&tid[2], NULL, (void *)consultar_conta, (conta_t *)&c) != 0)
-    exit(EXIT_FAILURE);
-  if (pthread_create(&tid[3], NULL, (void *)consultar_conta, (conta_t *)&c) != 0)
-    exit(EXIT_FAILURE);
-  if (pthread_create(&tid[4], NULL, (void *)consultar_conta, (conta_t *)&c) != 0)
-    exit(EXIT_FAILURE);
-  if (pthread_create(&tid[5], NULL, (void *)consultar_conta, (conta_t *)&c) != 0)
-    exit(EXIT_FAILURE);
+  for (int i = 2; i < 6; ++i)
+    if (pthread_create(&tid[i], NULL, fnConsulta, (void *)&m) != 0)
+      exit(EXIT_FAILURE);
 
-  pthread_join(tid[0], NULL);
-  pthread_join(tid[1], NULL);
-  pthread_join(tid[2], NULL);
-  pthread_join(tid[3], NULL);
-  pthread_join(tid[4], NULL);
-  pthread_join(tid[5], NULL);
+  for (int i = 0; i < 6; ++i)
+    pthread_join(tid[i], NULL);
 
   printf("História chegou ao fim\n");
   consultar_conta(&c);
-  pthread_rwlock_destroy(&c.rwl);
 
   exit(EXIT_SUCCESS);
 }
